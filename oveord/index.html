@@ -110,7 +110,7 @@
 
 		    this.fetchCollectionWords = function(selected) {
 				this.selectedCollection(selected);
-		    	$.get('api.php?a=getwords&i='+ selected.collectionid, function (data) { 
+		    	$.get('api.php?a=gw&i='+ selected.collectionid, function (data) { 
 					parent.words(data.words);
 					parent.reset();
 				});
@@ -176,7 +176,7 @@
 			}.bind(this);
 		};
 		
-		$.get('api.php?a=getcollections', function (data) { 
+		$.get('api.php?a=gc', function (data) { 
 			ko.applyBindings(new WordGameModel(data));
 		});
 	</script>

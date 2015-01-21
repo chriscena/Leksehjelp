@@ -125,14 +125,25 @@
 
 		    this.fetchCollectionWords = function(selected) {
 				this.selectedCollection(selected);
-		    	$.get('api.php?a=getwords&i='+ selected.collectionid, function (data) { 
+		    	$.get('api.php?a=gw&i='+ selected.collectionid, function (data) { 
 					parent.words(data.words);
 				});
 			}.bind(this);
 
 		    this.createWord = function() {
 		    	$.post('api.php', 
-		    		{ a: 'createword', cid: this.selectedCollection().collectionid, 
+		    		{ a: 'cw', cid: this.selectedCollection().collectionid, 
+		    			l: this.selectedLang(), nw: this.newWord(), fw: this.newForeignWord() }, 
+		    		function (data) { 
+					parent.words.push(data);
+					parent.newWord('');
+					parent.newForeignWord('');
+				});
+			}.bind(this);
+
+		    this.deleteWord = function() {
+		    	$.post('api.php', 
+		    		{ a: 'dw', cid: this.selectedCollection().collectionid, 
 		    			l: this.selectedLang(), nw: this.newWord(), fw: this.newForeignWord() }, 
 		    		function (data) { 
 					parent.words.push(data);
@@ -142,7 +153,7 @@
 			}.bind(this);
 		};
 		
-		$.get('api.php?a=getcollections', function (data) { 
+		$.get('api.php?a=gc', function (data) { 
 			ko.applyBindings(new CollectionModel(data));
 		});
 	</script>

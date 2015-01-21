@@ -8,7 +8,7 @@ if (count($_POST) > 0) {
 	$action = filter_input(INPUT_POST, 'a', FILTER_SANITIZE_STRING);
 
 	switch ($action) {
-		case 'createword':
+		case 'cw':
 			$collectionId = filter_input(INPUT_POST, 'cid', FILTER_SANITIZE_NUMBER_INT);
 			$norwegianWord = filter_input(INPUT_POST, 'nw', FILTER_SANITIZE_STRING);
 			$norwegianWordAudio = CreateAudioFile('no', $norwegianWord);
@@ -23,6 +23,9 @@ if (count($_POST) > 0) {
 
 			$result = CreateWord($collectionId, $lang, $norwegianWord, $norwegianWordAudio, $foreignWord, $foreignWordAudio);
 			break;
+		case 'dw':
+			$index = filter_input(INPUT_GET, 'i', FILTER_SANITIZE_NUMBER_INT);
+			DeleteWord($index);
 		default:
 			$result = "[]";
 			break;
@@ -31,10 +34,10 @@ if (count($_POST) > 0) {
 	$action = filter_input(INPUT_GET, 'a', FILTER_SANITIZE_STRING);
 
 	switch ($action) {
-		case 'getcollections':
+		case 'gc':
 			$result = GetCollections();
 			break;
-		case 'getwords':
+		case 'gw':
 			$index = filter_input(INPUT_GET, 'i', FILTER_SANITIZE_NUMBER_INT);
 			$result = GetWords($index);
 			break;
