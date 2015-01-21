@@ -31,7 +31,7 @@ function CreateWord($collectionid, $lang, $norword, $norwordaudio, $foreignword,
 
 		return array('wordid' => $wordid, 'collectionid' => $collectionid, 
 				'lang' => $lang, 'norword' => $norword, 'norwordaudio' => $norwordaudio, 
-				'engword' => $foreignword, 'engwordaudio' => $foreignwordaudio);
+				'foreignword' => $foreignword, 'foreignwordaudio' => $foreignwordaudio);
 
 	} catch (PDOException $e) {
 	    return array('error' => 'Connection failed: ' . $e->getMessage());
@@ -87,10 +87,11 @@ function CreateAudioFile($language, $word) {
 		$ch = curl_init();
 	    curl_setopt($ch, CURLOPT_URL, $url);
 	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	    // As found in http://www.useragentstring.com/
 	    curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
 		$mp3 = curl_exec($ch);
 	    curl_close($ch);
-	    
+
 		file_put_contents($filepath, $mp3);
 	}
 	

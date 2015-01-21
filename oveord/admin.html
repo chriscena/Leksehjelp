@@ -65,7 +65,7 @@
 							<tr>
 								<th>Språk</th>
 								<th>Ord</th>
-								<th>Lyd
+								<th>Lyd</th>
 								<th>Ord</th>
 								<th>Lyd</th>
 								<th></th>
@@ -79,8 +79,8 @@
 										<option value="en">Engelsk</option>
 									</select>
 								</td>
-								<td><span data-bind="text: foreignword"></span></td>
-								<td><audio controls="controls" data-bind="attr: {src: 'audio/' + foreignwordaudio}"></audio></td>
+								<td><span data-bind="if: lang != 'no'"><span data-bind="text: foreignword"></span></span></td>
+								<td><span data-bind="if: lang != 'no'"><audio controls="controls" data-bind="attr: {src: 'audio/' + foreignwordaudio}"></audio></span></td>
 								<td><span data-bind="text: norword"></span></td>
 								<td><audio controls="controls" data-bind="attr: {src: 'audio/' + norwordaudio}"></audio></td>
 								<td></td>
@@ -94,7 +94,7 @@
 										<option value="en">Engelsk</option>
 									</select>
 								</td>
-								<td><input type="text" data-bind="value: newForeignWord"/></td>
+								<td><span data-bind="if: selectedLang() != 'no'"><input type="text" data-bind="value: newForeignWord"/></span></td>
 								<td></td>
 								<td><input type="text" data-bind="value: newWord"/></td>
 								<td></td>
@@ -131,10 +131,13 @@
 			}.bind(this);
 
 		    this.createWord = function() {
-		    	$.post('api.php', { a: 'createword', cid: this.selectedCollection().collectionid, l: this.selectedLang(), nw: this.newWord() }, 
+		    	$.post('api.php', 
+		    		{ a: 'createword', cid: this.selectedCollection().collectionid, 
+		    			l: this.selectedLang(), nw: this.newWord(), fw: this.newForeignWord() }, 
 		    		function (data) { 
 					parent.words.push(data);
 					parent.newWord('');
+					parent.newForeignWord('');
 				});
 			}.bind(this);
 		};
