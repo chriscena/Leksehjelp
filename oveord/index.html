@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Leksehjelp: Øveord</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+</head>
+<body role="document">
+	<nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Vis/skjul meny</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Leksehjelp</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/oveord/">Øveord</a></li>
+            <!-- <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>-->
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container" role="main">
+    	<div class="page-header">
+			<h1>Øveord</h1>
+		</div>
+		
+		
+		<div class="row">
+			<div id="collectionlist" class="col-md-4">
+				<div class="list-group" data-bind="foreach: collections">
+					<a href="#" class="list-group-item" data-bind="click: $parent.fetchCollectionWords, text: name"></a>
+				</div>
+			</div>
+
+			<div id="wordtable" class="col-md-8">
+			<h2 data-bind="text: selectedCollection() == null ? 'Velg øveord' : selectedCollection().name"></h2>
+
+		<div class="progress">
+	        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-bind="attr: {'aria-valuenow': progress}, style: { width: progress() + '%' }"><span class="sr-only"><span data-bind="text: progress"></span>% ferdig</span></div>
+      	</div>
+
+		<section id="performTest" data-bind="visible: !testCompleted()">
+			<form data-bind="submit: checkWord">
+				<p><button data-bind="click: speakWord" class="btn btn-lg btn-primary btn-block"><span class="glyphicon glyphicon-volume-up" aria-hidden="true"></span> Les ord</button></p>
+				<p class="input-group">
+					<label for="answer" class="input-group-addon" id="basic-addon1"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></label>
+					<input type="text" id="answer" class="form-control input-lg" data-bind="value: wordGuessed, valueUpdate: 'afterkeydown', hasFocus: guessFocus, attr: { placeholder: wordHint }" aria-describedby="basic-addon1">
+				</p>
+				<p><button type="submit" data-bind="enable: wordGuessed().length > 0" class="btn btn-lg btn-success btn-block"><span class="glyphicon glyphicon-send" aria-hidden="true"></span> Svar</button></p>
+			</form>
+			<div id="correctAnswer" data-bind="visible: answerIsCorrect" class="alert alert-success" role="alert">
+				<p><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Riktig!</p>
+			</div>
+			<div id="wrongAnswer" data-bind="visible: answerIsWrong" class="alert alert-warning" role="alert">
+				<p><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Prøv igjen!</p>
+
+			<p><a data-bind="click: showWord"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Vis ordet</a></p>
+			</div>
+		</section>
+
+		<section id="testCompleted" data-bind="visible: testCompleted" class="alert alert-success">
+			<h2><span class="glyphicon glyphicon-registration-mark" aria-hidden="true"></span> Du klarte det!</h2>
+			
+			<p><a data-bind="click: reset"><span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> En gang til</a></p>
+		</section>
+	</div>
+	</div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.2.0/knockout-min.js"></script>
+	<script type="text/javascript">
+		var WordGameModel = function(items) {
+			var parent = this;
+			this.collections = ko.observableArray(items);
+			this.words = ko.observableArray();
+		    this.guessFocus = ko.observable(false);
+		    this.wordGuessed = ko.observable("");
+		    this.wordHint = ko.observable("");
+		    this.selectedCollection = ko.observable();
+		    this.answerIsCorrect = ko.observable(false);
+		    this.answerIsWrong = ko.observable(false);
+		    this.testCompleted = ko.observable(false);
+		    this.progress = ko.observable(0);
+		    var audio = document.createElement('audio');
+		    this.currentIndex = ko.observable(0);
+		    this.currentWord = ko.observable();
+
+		    this.fetchCollectionWords = function(selected) {
+				this.selectedCollection(selected);
+		    	$.get('api.php?a=getwords&i='+ selected.collectionid, function (data) { 
+					parent.words(data.words);
+					parent.reset();
+				});
+			}.bind(this);
+
+
+		    this.reset = function() {
+			    this.guessFocus(false);
+			    this.wordGuessed('');
+		    	this.wordHint('');
+			    this.currentIndex(0);
+			    this.currentWord(this.words()[this.currentIndex()]);
+				audio.setAttribute('src', 'audio/' + this.currentWord().norwordaudio);
+				audio.load();
+			    this.answerIsCorrect(false);
+			    this.answerIsWrong(false);
+			    this.testCompleted(false);
+		    	this.progress(0);
+			    setFocus();
+		    }.bind(this);
+
+		    this.showWord = function() {
+		    	this.wordHint(this.currentWord().norword);
+		    	setFocus();
+		    }.bind(this);
+
+		    var setFocus = function() {
+		    	parent.guessFocus(false);
+		    	parent.guessFocus(true);
+		    };
+
+		    this.speakWord = function() {
+	    		this.answerIsCorrect(false);
+	    		this.answerIsWrong(false);
+				audio.play();
+	    		setFocus();
+			}.bind(this); 
+
+		    this.checkWord = function() {
+	    		this.answerIsCorrect(false);
+	    		this.answerIsWrong(false);
+		    	if (this.wordGuessed().toLowerCase() == this.currentWord().norword.toLowerCase()) {
+		    		this.answerIsCorrect(true);
+		    		this.wordGuessed('');
+		    		this.wordHint('');
+		    		setFocus();
+
+		    		this.currentIndex(this.currentIndex() + 1);
+	    			this.progress(this.currentIndex() / this.words().length * 100);
+
+		    		if (this.currentIndex() >= this.words().length)
+		    			this.testCompleted(true);
+		    		else {
+		    			this.currentWord(this.words()[this.currentIndex()]);
+						audio.setAttribute('src', 'audio/' + this.currentWord().norwordaudio);
+						audio.load();
+		    		}
+	    		} else {
+	    			this.answerIsWrong(true);
+		    		this.wordGuessed('');
+		    		setFocus();
+	    		}
+			}.bind(this);
+		};
+		
+		$.get('api.php?a=getcollections', function (data) { 
+			ko.applyBindings(new WordGameModel(data));
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Leksehjelp: Øveord</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+</head>
+<body role="document">
+	<nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Vis/skjul meny</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Leksehjelp</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/oveord/">Øveord</a></li>
+            <!-- <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>-->
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container" role="main">
+    	<div class="page-header">
+			<h1>Øveord</h1>
+		</div>
+		
+		<div class="row">
+			<div id="collectionlist" class="col-md-4">
+				<div class="list-group" data-bind="foreach: collections">
+					<a href="#" class="list-group-item" data-bind="click: $parent.fetchCollectionWords, text: name"></a>
+				</div>
+			</div>
+
+			<div id="wordtable" class="col-md-8">
+				<form data-bind="submit: createWord">
+					<table class="table">
+						<col />
+						<col style="visibility: collapse;" span="2" />
+						<col span="2" />
+						<col />
+						<thead>
+							<tr>
+								<th>Språk</th>
+								<th>Ord</th>
+								<th>Lyd
+								<th>Ord</th>
+								<th>Lyd</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody data-bind="foreach: words">
+							<tr>
+								<td>
+									<select data-bind="value: lang" disabled="disabled">
+										<option value="no">Norsk</option>
+										<option value="en">Engelsk</option>
+									</select>
+								</td>
+								<td><span data-bind="text: foreignword"></span></td>
+								<td><audio controls="controls" data-bind="attr: {src: 'audio/' + foreignwordaudio}"></audio></td>
+								<td><span data-bind="text: norword"></span></td>
+								<td><audio controls="controls" data-bind="attr: {src: 'audio/' + norwordaudio}"></audio></td>
+								<td></td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td>
+									<select data-bind="value: selectedLang">
+										<option value="no">Norsk</option>
+										<option value="en">Engelsk</option>
+									</select>
+								</td>
+								<td><input type="text" data-bind="value: newForeignWord"/></td>
+								<td></td>
+								<td><input type="text" data-bind="value: newWord"/></td>
+								<td></td>
+								<td><button type="submit">Legg til</button></td>
+
+							</tr>
+						</tfoot>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.2.0/knockout-min.js"></script>
+	<script type="text/javascript">
+
+		var CollectionModel = function(items) {
+		    
+			this.collections = ko.observableArray(items);
+			this.words = ko.observableArray();
+			this.newForeignWord = ko.observable('');
+			this.newWord = ko.observable('');
+			this.selectedLang = ko.observable('no');
+
+			this.selectedCollection = ko.observable();
+		    var parent = this;
+
+		    this.fetchCollectionWords = function(selected) {
+				this.selectedCollection(selected);
+		    	$.get('api.php?a=getwords&i='+ selected.collectionid, function (data) { 
+					parent.words(data.words);
+				});
+			}.bind(this);
+
+		    this.createWord = function() {
+		    	$.post('api.php', { a: 'createword', cid: this.selectedCollection().collectionid, l: this.selectedLang(), nw: this.newWord() }, 
+		    		function (data) { 
+					parent.words.push(data);
+					parent.newWord('');
+				});
+			}.bind(this);
+		};
+		
+		$.get('api.php?a=getcollections', function (data) { 
+			ko.applyBindings(new CollectionModel(data));
+		});
+	</script>
+</body>
+</html>
