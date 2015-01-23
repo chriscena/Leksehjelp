@@ -99,7 +99,6 @@
 		    this.guessFocus = ko.observable(false);
 		    this.wordGuessed = ko.observable("");
 		    this.wordHint = ko.observable("");
-		    this.selectedCollection = ko.observable();
 		    this.answerIsCorrect = ko.observable(false);
 		    this.answerIsWrong = ko.observable(false);
 		    this.testCompleted = ko.observable(false);
@@ -107,11 +106,26 @@
 		    var audio = document.createElement('audio');
 		    this.currentIndex = ko.observable(0);
 		    this.currentWord = ko.observable();
+		    this.selectedCollection = ko.observable();
+
+		    var shuffle = function (array) {
+				var currentIndex = array.length, temporaryValue, randomIndex ;
+
+				while (0 !== currentIndex) {
+					randomIndex = Math.floor(Math.random() * currentIndex);
+					currentIndex -= 1;
+
+					temporaryValue = array[currentIndex];
+					array[currentIndex] = array[randomIndex];
+					array[randomIndex] = temporaryValue;
+				}
+				return array;
+			};
 
 		    this.fetchCollectionWords = function(selected) {
 				this.selectedCollection(selected);
 		    	$.get('api.php?a=gw&i='+ selected.collectionid, function (data) { 
-					parent.words(data.words);
+					parent.words(shuffle(data.words));
 					parent.reset();
 				});
 			}.bind(this);
@@ -152,7 +166,7 @@
 		    this.checkWord = function() {
 	    		this.answerIsCorrect(false);
 	    		this.answerIsWrong(false);
-		    	if (this.wordGuessed().toLowerCase() == this.currentWord().norword.toLowerCase()) {
+		    	if (this.wordGuessed().toLowerCase() == this.currentWord().foreignword.toLowerCase()) {
 		    		this.answerIsCorrect(true);
 		    		this.wordGuessed('');
 		    		this.wordHint('');
@@ -174,6 +188,8 @@
 		    		setFocus();
 	    		}
 			}.bind(this);
+
+		    this.fetchCollectionWords(this.collections()[this.currentIndex()]);
 		};
 		
 		$.get('api.php?a=gc', function (data) { 

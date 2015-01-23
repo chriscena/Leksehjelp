@@ -55,17 +55,14 @@
 			</div>
 
 			<div id="wordtable" class="col-md-8">
-				<form data-bind="submit: createWord">
+				<h2 data-bind="text: selectedCollectionName"></h2>
 					<table class="table">
-						<col />
-						<col style="visibility: collapse;" span="2" />
-						<col span="2" />
-						<col />
 						<thead>
 							<tr>
-								<th>Språk</th>
+								<!-- ko if: selectedLang() != 'no' --> 
 								<th>Ord</th>
 								<th>Lyd</th>
+								<!-- /ko --> 
 								<th>Ord</th>
 								<th>Lyd</th>
 								<th></th>
@@ -73,36 +70,27 @@
 						</thead>
 						<tbody data-bind="foreach: words">
 							<tr>
-								<td>
-									<select data-bind="value: lang" disabled="disabled">
-										<option value="no">Norsk</option>
-										<option value="en">Engelsk</option>
-									</select>
-								</td>
-								<td><span data-bind="if: lang != 'no'"><span data-bind="text: foreignword"></span></span></td>
-								<td><span data-bind="if: lang != 'no'"><audio controls="controls" data-bind="attr: {src: 'audio/' + foreignwordaudio}"></audio></span></td>
+								<!-- ko if: $parent.selectedLang() != 'no' --> 
+								<td><span data-bind="text: foreignword"></span></td>
+								<td><button class="audio"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+									<audio data-bind="attr: {src: 'audio/' + foreignwordaudio}"></audio></td>
+								<!-- /ko -->
 								<td><span data-bind="text: norword"></span></td>
-								<td><audio controls="controls" data-bind="attr: {src: 'audio/' + norwordaudio}"></audio></td>
-								<td></td>
+								<td><button class="audio"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+									<audio data-bind="attr: {src: 'audio/' + norwordaudio}"></audio></td>
+								<td><button data-bind="click: $parent.deleteWord">Slett</button></td>
 							</tr>
 						</tbody>
 						<tfoot>
 							<tr>
-								<td>
-									<select data-bind="value: selectedLang">
-										<option value="no">Norsk</option>
-										<option value="en">Engelsk</option>
-									</select>
-								</td>
-								<td><span data-bind="if: selectedLang() != 'no'"><input type="text" data-bind="value: newForeignWord"/></span></td>
-								<td></td>
-								<td><input type="text" data-bind="value: newWord"/></td>
-								<td></td>
-								<td><button type="submit">Legg til</button></td>
+								<!-- ko if: selectedLang() != 'no' --> 
+								<td colspan="2"><input type="text" data-bind="value: newForeignWord"/></td>
+								<!-- /ko -->
+								<td colspan="2"><input type="text" data-bind="value: newWord"/></td>
+								<td><button type="submit" data-bind="click: createWord">Legg til</button></td>
 
 							</tr>
 						</tfoot>
-					</table>
 				</form>
 			</div>
 		</div>
@@ -119,14 +107,23 @@
 			this.newForeignWord = ko.observable('');
 			this.newWord = ko.observable('');
 			this.selectedLang = ko.observable('no');
+			this.selectedCollectionName = ko.observable('');
 
 			this.selectedCollection = ko.observable();
 		    var parent = this;
 
 		    this.fetchCollectionWords = function(selected) {
 				this.selectedCollection(selected);
+				this.selectedLang(selected.lang);
+				this.selectedCollectionName(selected.name + ' - ' + selected.lang);
+
+				$('button.audio').off('click');		
+
 		    	$.get('api.php?a=gw&i='+ selected.collectionid, function (data) { 
 					parent.words(data.words);
+					$('button.audio').on('click', function() { 
+						$(this).next('audio').get(0).play(); 
+					});		
 				});
 			}.bind(this);
 
@@ -141,14 +138,11 @@
 				});
 			}.bind(this);
 
-		    this.deleteWord = function() {
+		    this.deleteWord = function(selected) {
 		    	$.post('api.php', 
-		    		{ a: 'dw', cid: this.selectedCollection().collectionid, 
-		    			l: this.selectedLang(), nw: this.newWord(), fw: this.newForeignWord() }, 
+		    		{ a: 'dw', i: selected.wordid }, 
 		    		function (data) { 
-					parent.words.push(data);
-					parent.newWord('');
-					parent.newForeignWord('');
+		    			parent.words.remove(selected);
 				});
 			}.bind(this);
 		};
