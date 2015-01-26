@@ -93,7 +93,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.2.0/knockout-min.js"></script>
 	<script type="text/javascript">
 		var WordGameModel = function(items) {
-			var parent = this;
+			var viewModel = this;
 			this.collections = ko.observableArray(items);
 			this.words = ko.observableArray();
 		    this.guessFocus = ko.observable(false);
@@ -104,6 +104,7 @@
 		    this.testCompleted = ko.observable(false);
 		    this.progress = ko.observable(0);
 		    var audio = document.createElement('audio');
+		    var answer;
 		    this.currentIndex = ko.observable(0);
 		    this.currentWord = ko.observable();
 		    this.selectedCollection = ko.observable();
@@ -122,23 +123,33 @@
 				return array;
 			};
 
+			this.setNextQuestion = function(index) {
+    			viewModel.currentWord(viewModel.words()[index]);
+				if (viewModel.selectedCollection().lang == 'no') {
+					answer = viewModel.currentWord().norword;
+				}
+				else {
+					answer = viewModel.currentWord().foreignword;
+				}
+
+				audio.setAttribute('src', 'audio/' + this.currentWord().norwordaudio);
+				audio.load();
+			}.bind(this);
+
 		    this.fetchCollectionWords = function(selected) {
 				this.selectedCollection(selected);
 		    	$.get('api.php?a=gw&i='+ selected.collectionid, function (data) { 
-					parent.words(shuffle(data.words));
-					parent.reset();
+					viewModel.words(shuffle(data.words));
+					viewModel.reset();
 				});
 			}.bind(this);
-
 
 		    this.reset = function() {
 			    this.guessFocus(false);
 			    this.wordGuessed('');
 		    	this.wordHint('');
 			    this.currentIndex(0);
-			    this.currentWord(this.words()[this.currentIndex()]);
-				audio.setAttribute('src', 'audio/' + this.currentWord().norwordaudio);
-				audio.load();
+			    this.setNextQuestion(this.currentIndex());
 			    this.answerIsCorrect(false);
 			    this.answerIsWrong(false);
 			    this.testCompleted(false);
@@ -147,13 +158,13 @@
 		    }.bind(this);
 
 		    this.showWord = function() {
-		    	this.wordHint(this.currentWord().norword);
+	    		this.wordHint(answer);
 		    	setFocus();
 		    }.bind(this);
 
 		    var setFocus = function() {
-		    	parent.guessFocus(false);
-		    	parent.guessFocus(true);
+		    	viewModel.guessFocus(false);
+		    	viewModel.guessFocus(true);
 		    };
 
 		    this.speakWord = function() {
@@ -161,26 +172,23 @@
 	    		this.answerIsWrong(false);
 				audio.play();
 	    		setFocus();
-			}.bind(this); 
+			}.bind(this);
 
-		    this.checkWord = function() {
+			this.checkWord = function() {
 	    		this.answerIsCorrect(false);
 	    		this.answerIsWrong(false);
-		    	if (this.wordGuessed().toLowerCase() == this.currentWord().foreignword.toLowerCase()) {
+		    	if (this.wordGuessed().toLowerCase() == answer.toLowerCase()) {
 		    		this.answerIsCorrect(true);
 		    		this.wordGuessed('');
 		    		this.wordHint('');
 		    		setFocus();
-
 		    		this.currentIndex(this.currentIndex() + 1);
 	    			this.progress(this.currentIndex() / this.words().length * 100);
 
 		    		if (this.currentIndex() >= this.words().length)
 		    			this.testCompleted(true);
 		    		else {
-		    			this.currentWord(this.words()[this.currentIndex()]);
-						audio.setAttribute('src', 'audio/' + this.currentWord().norwordaudio);
-						audio.load();
+		    			this.setNextQuestion(this.currentIndex());
 		    		}
 	    		} else {
 	    			this.answerIsWrong(true);
