@@ -49,13 +49,29 @@
 		
 		<div class="row">
 			<div id="collectionlist" class="col-md-4">
+				<div>
+					<button data-bind="click: newCollection" title="Legg til"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+				</div>
+
 				<div class="list-group" data-bind="foreach: collections">
-					<a href="#" class="list-group-item" data-bind="click: $parent.fetchCollectionWords, text: name"></a>
+					<a href="#" class="list-group-item" data-bind="click: $parent.fetchCollectionWords, text: name + ' - ' + lang"></a>
 				</div>
 			</div>
 
 			<div id="wordtable" class="col-md-8">
-				<h2 data-bind="text: selectedCollectionName"></h2>
+
+				<div data-bind="visible: isCreatingCollection">
+					<input data-bind="value: newCollectionName">
+					<select data-bind="value: newCollectionLang">
+						<option value="no">Norsk</option>
+						<option value="en">Engelsk</option>
+					</select>
+					<button data-bind="click: cancelCollection" title="Slett"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+					<button data-bind="click: createCollection" title="Legg til"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+				</div>
+
+				<div data-bind="visible: isEditingWords">
+					<h2 data-bind="text: selectedCollectionName"></h2>
 					<table class="table">
 						<thead>
 							<tr>
@@ -78,7 +94,7 @@
 								<td><span data-bind="text: norword"></span></td>
 								<td><button class="audio"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
 									<audio data-bind="attr: {src: 'audio/' + norwordaudio}"></audio></td>
-								<td><button data-bind="click: $parent.deleteWord">Slett</button></td>
+								<td><button data-bind="click: $parent.deleteWord" title="Slett"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
 							</tr>
 						</tbody>
 						<tfoot>
@@ -87,11 +103,12 @@
 								<td colspan="2"><input type="text" data-bind="value: newForeignWord"/></td>
 								<!-- /ko -->
 								<td colspan="2"><input type="text" data-bind="value: newWord"/></td>
-								<td><button type="submit" data-bind="click: createWord">Legg til</button></td>
+								<td><button type="submit" data-bind="click: createWord" title="Legg til"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button></td>
 
 							</tr>
 						</tfoot>
-				</form>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -102,49 +119,91 @@
 
 		var CollectionModel = function(items) {
 		    
-			this.collections = ko.observableArray(items);
-			this.words = ko.observableArray();
-			this.newForeignWord = ko.observable('');
-			this.newWord = ko.observable('');
-			this.selectedLang = ko.observable('no');
-			this.selectedCollectionName = ko.observable('');
+			var collections = ko.observableArray(items),
+				words = ko.observableArray(),
+				newForeignWord = ko.observable(''),
+				newWord = ko.observable(''),
+				selectedLang = ko.observable('no'),
+				selectedCollectionName = ko.observable(''),
+				selectedCollection = ko.observable(),
+				newCollectionName = ko.observable(''),
+				newCollectionLang = ko.observable('no'),
+				isCreatingCollection = ko.observable(false),
+				isEditingWords = ko.computed(function() { return selectedCollection(); });
 
-			this.selectedCollection = ko.observable();
-		    var parent = this;
+		    var newCollection = function() {
+		    	isCreatingCollection(true);
+		    };
 
-		    this.fetchCollectionWords = function(selected) {
-				this.selectedCollection(selected);
-				this.selectedLang(selected.lang);
-				this.selectedCollectionName(selected.name + ' - ' + selected.lang);
+		    var cancelCollection = function() {
+				newCollectionLang('no');
+				newCollectionName('');
+		    	isCreatingCollection(false);
+		    };
+
+		    var createCollection = function() {
+		    	$.post('api.php', 
+		    		{ a: 'cc', n: newCollectionName(), l: newCollectionLang() }, 
+		    		function (data) { 
+						collections.push(data);
+						cancelCollection();
+						fetchCollectionWords(data);
+				});
+		    };
+
+		    var fetchCollectionWords = function(selected) {
+				selectedCollection(selected);
+				selectedLang(selected.lang);
+				selectedCollectionName(selected.name + ' - ' + selected.lang);
 
 				$('button.audio').off('click');		
 
 		    	$.get('api.php?a=gw&i='+ selected.collectionid, function (data) { 
-					parent.words(data.words);
+					words(data.words);
 					$('button.audio').on('click', function() { 
 						$(this).next('audio').get(0).play(); 
 					});		
 				});
-			}.bind(this);
+			};
 
-		    this.createWord = function() {
+		    var createWord = function() {
 		    	$.post('api.php', 
-		    		{ a: 'cw', cid: this.selectedCollection().collectionid, 
-		    			l: this.selectedLang(), nw: this.newWord(), fw: this.newForeignWord() }, 
+		    		{ a: 'cw', cid: selectedCollection().collectionid, 
+		    			l: selectedLang(), nw: newWord(), fw: newForeignWord() }, 
 		    		function (data) { 
-					parent.words.push(data);
-					parent.newWord('');
-					parent.newForeignWord('');
+					words.push(data);
+					newWord('');
+					newForeignWord('');
 				});
-			}.bind(this);
+			};
 
-		    this.deleteWord = function(selected) {
+		    var deleteWord = function(selected) {
 		    	$.post('api.php', 
 		    		{ a: 'dw', i: selected.wordid }, 
 		    		function (data) { 
-		    			parent.words.remove(selected);
+		    			words.remove(selected);
 				});
-			}.bind(this);
+			};
+
+			return {
+				collections: collections,
+				words: words,
+				newForeignWord: newForeignWord,
+				newWord: newWord,
+				selectedLang: selectedLang,
+				selectedCollectionName: selectedCollectionName,
+				selectedCollection: selectedCollection,
+				newCollection: newCollection,
+				fetchCollectionWords: fetchCollectionWords,
+				createWord: createWord,
+				deleteWord: deleteWord,
+				newCollectionName: newCollectionName,
+				newCollectionLang: newCollectionLang,
+				isCreatingCollection: isCreatingCollection,
+				cancelCollection: cancelCollection,
+				isEditingWords: isEditingWords,
+				createCollection: createCollection
+			};
 		};
 		
 		$.get('api.php?a=gc', function (data) { 

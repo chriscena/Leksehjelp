@@ -10,7 +10,7 @@ function CreateCollection($name, $language) {
 		$sth->execute(array(":name" => $name, ":lang" => $language));
 		$collectionid = $dbh->lastInsertId();
 
-		return array("collectionid" => $collectionid, "name" => $name, "lang" => $lang);
+		return array("collectionid" => $collectionid, "name" => $name, "lang" => $language);
 
 	} catch (PDOException $e) {
 	    return array("error" => "Connection failed: " . $e->getMessage());

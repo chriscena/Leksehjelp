@@ -3,6 +3,7 @@ require_once("admin.inc");
 header("Content-Type: application/json");
 
 $result = "[]";
+$filename = "audio/log.txt";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	$action = filter_input(INPUT_POST, "a", FILTER_SANITIZE_STRING);
@@ -11,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		case "cc":
 			$name = filter_input(INPUT_POST, "n", FILTER_SANITIZE_STRING);
 			$language = filter_input(INPUT_POST, "l", FILTER_SANITIZE_STRING);
+			file_put_contents ( $filename , "\r\nn: " . $name . ", l: " . $language, FILE_APPEND);
 			$result = CreateCollection($name, $language);
 			break;
 		case "cw":
