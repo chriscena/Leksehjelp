@@ -10,7 +10,7 @@ function CreateCollection($name, $language) {
 		$sth->execute(array(':name' => $name, ':lang' => $language));
 		$collectionid = $dbh->lastInsertId();
 
-		return array('collectionid' => $collectionid, 'name' => $name, 
+		return array('collectionid' => $collectionid, 'name' => trim($name), 
 			'lang' => $language, 'langName' => GetLanguageName($language));
 
 	} catch (PDOException $e) {
@@ -30,8 +30,8 @@ function CreateWord($collectionid, $lang, $norword, $norwordaudio, $foreignword,
 				.':foreignword, :foreignwordaudio)');
 
 		$sth->execute(array(':collectionid' => $collectionid, ':lang' => $lang,
-			':norword' => $norword, ':norwordaudio' => $norwordaudio, 
-			':foreignword' => $foreignword, 
+			':norword' => trim($norword), ':norwordaudio' => $norwordaudio, 
+			':foreignword' => trim($foreignword), 
 			':foreignwordaudio' => $foreignwordaudio));
 		$wordid = $dbh->lastInsertId();
 

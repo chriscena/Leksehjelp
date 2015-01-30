@@ -83,7 +83,7 @@ var WordGameModel = function(items) {
 	this.checkWord = function() {
 		this.answerIsCorrect(false);
 		this.answerIsWrong(false);
-    	if (this.wordGuessed().toLowerCase() == answer.toLowerCase()) {
+    	if (this.wordGuessed().toLowerCase() == answer.trim().toLowerCase()) {
     		this.answerIsCorrect(true);
     		this.wordGuessed('');
     		this.wordHint('');

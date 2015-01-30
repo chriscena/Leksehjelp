@@ -50,8 +50,10 @@
 		
 		<div class="row">
 			<div id="collectionlist" class="col-md-4">
-				<div>
-					<button data-bind="click: newCollection" title="Legg til"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+				<div class="form-inline">
+					<button class="btn btn-success" data-bind="click: newCollection" title="Legg til">
+						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+					</button>
 				</div>
 
 				<div class="list-group" data-bind="foreach: collections">
@@ -61,14 +63,20 @@
 
 			<div id="wordtable" class="col-md-8">
 
-				<div id="collectionForm" data-bind="css: { show: isCreatingCollection }">
-					<input data-bind="value: newCollectionName">
-					<select data-bind="value: newCollectionLang">
+				<div id="collectionForm" class="form-inline" data-bind="css: { show: isCreatingCollection }">
+					<h2>Ny liste</h2>
+					
+					<input class="form-control" data-bind="value: newCollectionName">
+					<select class="form-control" data-bind="value: newCollectionLang">
 						<option value="no">Norsk</option>
 						<option value="en">Engelsk</option>
 					</select>
-					<button data-bind="click: cancelCollection" title="Slett"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-					<button data-bind="click: createCollection" title="Legg til"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+					<button class="btn btn-default" data-bind="click: cancelCollection" title="Slett">
+						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+					</button>
+					<button class="btn btn-success" data-bind="click: createCollection" title="Legg til">
+						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+					</button>
 				</div>
 
 				<div id="wordlist" data-bind="css: { show: isEditingWords }">
@@ -89,22 +97,27 @@
 							<tr>
 								<!-- ko if: $parent.selectedLang() != 'no' --> 
 								<td><span data-bind="text: foreignword"></span></td>
-								<td><button class="audio"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+								<td><button class="btn btn-default audio"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
 									<audio data-bind="attr: {src: 'audio/' + foreignwordaudio}"></audio></td>
 								<!-- /ko -->
 								<td><span data-bind="text: norword"></span></td>
-								<td><button class="audio"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+								<td><button class="btn btn-default audio"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
 									<audio data-bind="attr: {src: 'audio/' + norwordaudio}"></audio></td>
-								<td><button data-bind="click: $parent.deleteWord" title="Slett"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
+								<td><button class="btn btn-default" data-bind="click: $parent.deleteWord" title="Slett">
+									<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+								</button></td>
 							</tr>
 						</tbody>
 						<tfoot>
 							<tr>
 								<!-- ko if: selectedLang() != 'no' --> 
-								<td colspan="2"><input type="text" data-bind="value: newForeignWord"/></td>
+								<td colspan="2">
+									<input class="form-control" type="text" 
+										data-bind="value: newForeignWord, attr: { placeholder: selectedCollection().langName }"/>
+								</td>
 								<!-- /ko -->
-								<td colspan="2"><input type="text" data-bind="value: newWord"/></td>
-								<td><button type="submit" data-bind="click: createWord" title="Legg til"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button></td>
+								<td colspan="2"><input placeholder="Norsk" class="form-control" type="text" data-bind="value: newWord"/></td>
+								<td><button class="btn btn-success" type="submit" data-bind="click: createWord" title="Legg til"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button></td>
 
 							</tr>
 						</tfoot>

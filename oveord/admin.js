@@ -14,6 +14,7 @@ var CollectionModel = function(items) {
 
     var newCollection = function() {
     	isCreatingCollection(true);
+    	selectedCollection(null);
     };
 
     var cancelCollection = function() {
@@ -24,7 +25,7 @@ var CollectionModel = function(items) {
 
     var createCollection = function() {
     	$.post('api/', 
-    		{ a: 'cc', n: newCollectionName(), l: newCollectionLang() }, 
+    		{ a: 'cc', n: newCollectionName().trim(), l: newCollectionLang() }, 
     		function (data) { 
 				collections.push(data);
 				cancelCollection();
@@ -33,6 +34,7 @@ var CollectionModel = function(items) {
     };
 
     var fetchCollectionWords = function(selected) {
+    	isCreatingCollection(false);
 		selectedCollection(selected);
 		selectedLang(selected.lang);
 		selectedCollectionName(selected.name + ' - ' + selected.langName);
@@ -48,9 +50,10 @@ var CollectionModel = function(items) {
 	};
 
     var createWord = function() {
+    	var foreignWord = newForeignWord() ? newForeignWord().trim() : newForeignWord();
     	$.post('api/', 
     		{ a: 'cw', cid: selectedCollection().collectionid, 
-    			l: selectedLang(), nw: newWord(), fw: newForeignWord() }, 
+    			l: selectedLang(), nw: newWord().trim(), fw: newForeignWord() }, 
     		function (data) { 
 			words.push(data);
 			newWord('');
