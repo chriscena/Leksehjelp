@@ -1,0 +1,9 @@
+#wordlist, 
+#collectionForm {
+	display: none;
+}
+
+#wordlist.show,
+#collectionForm.show {
+	display: block;
+}

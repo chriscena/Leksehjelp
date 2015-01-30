@@ -1,0 +1,12 @@
+
+#correctAnswer, 
+#wrongAnswer, 
+#testCompleted {
+	display: none;
+}
+
+#correctAnswer.show, 
+#wrongAnswer.show, 
+#testCompleted.show {
+	display: block;
+}
