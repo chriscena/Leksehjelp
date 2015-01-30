@@ -51,12 +51,12 @@
 		<div class="row">
 			<div id="collectionlist" class="col-md-4">
 				<div class="list-group" data-bind="foreach: collections">
-					<a href="#" class="list-group-item" data-bind="click: $parent.fetchCollectionWords, text: name"></a>
+					<a href="#" class="list-group-item" data-bind="click: $parent.fetchCollectionWords, text: name + ' - ' + langName"></a>
 				</div>
 			</div>
 
 			<div id="wordtable" class="col-md-8">
-			<h2 data-bind="text: selectedCollection() == null ? 'Velg øveord' : selectedCollection().name"></h2>
+			<h2 data-bind="text: selectedCollection() == null ? 'Velg øveord' : selectedCollection().name + ' - ' + selectedCollection().langName"></h2>
 
 		<div class="progress">
 	        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-bind="attr: {'aria-valuenow': progress}, style: { width: progress() + '%' }"><span class="sr-only"><span data-bind="text: progress"></span>% ferdig</span></div>
@@ -138,7 +138,7 @@
 
 		    this.fetchCollectionWords = function(selected) {
 				this.selectedCollection(selected);
-		    	$.get('api.php?a=gw&i='+ selected.collectionid, function (data) { 
+		    	$.get('api/?a=gw&i='+ selected.collectionid, function (data) { 
 					viewModel.words(shuffle(data.words));
 					viewModel.reset();
 				});
@@ -200,7 +200,7 @@
 		    this.fetchCollectionWords(this.collections()[this.currentIndex()]);
 		};
 		
-		$.get('api.php?a=gc', function (data) { 
+		$.get('api/?a=gc', function (data) { 
 			ko.applyBindings(new WordGameModel(data));
 		});
 	</script>

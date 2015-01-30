@@ -54,7 +54,7 @@
 				</div>
 
 				<div class="list-group" data-bind="foreach: collections">
-					<a href="#" class="list-group-item" data-bind="click: $parent.fetchCollectionWords, text: name + ' - ' + lang"></a>
+					<a href="#" class="list-group-item" data-bind="click: $parent.fetchCollectionWords, text: name + ' - ' + langName"></a>
 				</div>
 			</div>
 
@@ -142,7 +142,7 @@
 		    };
 
 		    var createCollection = function() {
-		    	$.post('api.php', 
+		    	$.post('api/', 
 		    		{ a: 'cc', n: newCollectionName(), l: newCollectionLang() }, 
 		    		function (data) { 
 						collections.push(data);
@@ -154,11 +154,11 @@
 		    var fetchCollectionWords = function(selected) {
 				selectedCollection(selected);
 				selectedLang(selected.lang);
-				selectedCollectionName(selected.name + ' - ' + selected.lang);
+				selectedCollectionName(selected.name + ' - ' + selected.langName);
 
 				$('button.audio').off('click');		
 
-		    	$.get('api.php?a=gw&i='+ selected.collectionid, function (data) { 
+		    	$.get('api/?a=gw&i='+ selected.collectionid, function (data) { 
 					words(data.words);
 					$('button.audio').on('click', function() { 
 						$(this).next('audio').get(0).play(); 
@@ -167,7 +167,7 @@
 			};
 
 		    var createWord = function() {
-		    	$.post('api.php', 
+		    	$.post('api/', 
 		    		{ a: 'cw', cid: selectedCollection().collectionid, 
 		    			l: selectedLang(), nw: newWord(), fw: newForeignWord() }, 
 		    		function (data) { 
@@ -178,7 +178,7 @@
 			};
 
 		    var deleteWord = function(selected) {
-		    	$.post('api.php', 
+		    	$.post('api/', 
 		    		{ a: 'dw', i: selected.wordid }, 
 		    		function (data) { 
 		    			words.remove(selected);
@@ -206,7 +206,7 @@
 			};
 		};
 		
-		$.get('api.php?a=gc', function (data) { 
+		$.get('api/?a=gc', function (data) { 
 			ko.applyBindings(new CollectionModel(data));
 		});
 	</script>
