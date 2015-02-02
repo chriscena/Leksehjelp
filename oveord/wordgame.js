@@ -1,31 +1,30 @@
 var WordGameModel = function(items) {
-	var viewModel = this;
-	this.collections = ko.observableArray(items);
-	this.words = ko.observableArray();
-    this.guessFocus = ko.observable(false);
-    this.wordGuessed = ko.observable("");
-    this.wordHint = ko.observable("");
-    this.answerIsCorrect = ko.observable(false);
-    this.answerIsWrong = ko.observable(false);
-    this.testCompleted = ko.observable(false);
-    this.progress = ko.observable(0);
-    var answer;
-    this.currentIndex = ko.observable(0);
-    this.currentWord = ko.observable();
-    this.isForeignWord = ko.computed(function() { 
-    	return viewModel.currentWord() && viewModel.currentWord().lang != 'no'; 
-    });
-    this.norWordAudio = ko.computed(function() {
-    	return viewModel.currentWord() && viewModel.currentWord().norwordaudio 
-    		? 'audio/' + viewModel.currentWord().norwordaudio
-    		: '';
-    });
-    this.foreignWordAudio = ko.computed(function() {
-    	return viewModel.currentWord() && viewModel.currentWord().foreignwordaudio 
-    		? 'audio/' + viewModel.currentWord().foreignwordaudio
-    		: '';
-    });
-    this.selectedCollection = ko.observable();
+	var collections = ko.observableArray(items),
+        words = ko.observableArray(),
+        guessFocus = ko.observable(false),
+        wordGuessed = ko.observable(""),
+        wordHint = ko.observable(""),
+        answerIsCorrect = ko.observable(false),
+        answerIsWrong = ko.observable(false),
+        testCompleted = ko.observable(false),
+        progress = ko.observable(0),
+        answer,
+        currentIndex = ko.observable(0),
+        currentWord = ko.observable(),
+        isForeignWord = ko.computed(function() { 
+    	   return currentWord() && currentWord().lang != 'no'; 
+        }),
+        norWordAudio = ko.computed(function() {
+            return currentWord() && currentWord().norwordaudio 
+                ? 'audio/' + currentWord().norwordaudio
+                : '';
+        }),
+        foreignWordAudio = ko.computed(function() {
+        	return currentWord() && currentWord().foreignwordaudio 
+        		? 'audio/' + currentWord().foreignwordaudio
+        		: '';
+        }),
+        selectedCollection = ko.observable();
 
     var shuffle = function (array) {
 		var currentIndex = array.length, temporaryValue, randomIndex ;
@@ -41,75 +40,101 @@ var WordGameModel = function(items) {
 		return array;
 	};
 
-	this.setNextQuestion = function(index) {
-		viewModel.currentWord(viewModel.words()[index]);
-		if (viewModel.selectedCollection().lang == 'no') {
-			answer = viewModel.currentWord().norword;
+	var setNextQuestion = function(index) {
+		currentWord(words()[index]);
+		if (selectedCollection().lang == 'no') {
+			answer = currentWord().norword;
 		}
 		else {
-			answer = viewModel.currentWord().foreignword;
+			answer = currentWord().foreignword;
 		}
+
+        $('button.mainaudio').on('click', function() { 
+            answerIsCorrect(false);
+            answerIsWrong(false);
+            $(this).next('audio').get(0).play(); 
+        });
 
 		$('button.audio').on('click', function() { 
 			$(this).next('audio').get(0).play(); 
 		});	
-	}.bind(this);
+	};
 
-    this.fetchCollectionWords = function(selected) {
-		this.selectedCollection(selected);
+    var fetchCollectionWords = function(selected) {
+	selectedCollection(selected);
     	$.get('api/?a=gw&i='+ selected.collectionid, function (data) { 
-			viewModel.words(shuffle(data.words));
-			viewModel.reset();
+			words(shuffle(data.words));
+			reset();
 		});
-	}.bind(this);
+	};
 
-    this.reset = function() {
-	    this.guessFocus(false);
-	    this.wordGuessed('');
-    	this.wordHint('');
-	    this.currentIndex(0);
-	    this.setNextQuestion(this.currentIndex());
-	    this.answerIsCorrect(false);
-	    this.answerIsWrong(false);
-	    this.testCompleted(false);
-    	this.progress(0);
+    var reset = function() {
+	    guessFocus(false);
+	    wordGuessed('');
+    	wordHint('');
+	    currentIndex(0);
+	    setNextQuestion(currentIndex());
+	    answerIsCorrect(false);
+	    answerIsWrong(false);
+	    testCompleted(false);
+    	progress(0);
 	    setFocus();
-    }.bind(this);
-
-    this.showWord = function() {
-		this.wordHint(answer);
-    	setFocus();
-    }.bind(this);
-
-    var setFocus = function() {
-    	viewModel.guessFocus(false);
-    	viewModel.guessFocus(true);
     };
 
-	this.checkWord = function() {
-		this.answerIsCorrect(false);
-		this.answerIsWrong(false);
-    	if (this.wordGuessed().toLowerCase() == answer.trim().toLowerCase()) {
-    		this.answerIsCorrect(true);
-    		this.wordGuessed('');
-    		this.wordHint('');
-    		setFocus();
-    		this.currentIndex(this.currentIndex() + 1);
-			this.progress(this.currentIndex() / this.words().length * 100);
+    var showWord = function() {
+		wordHint(answer);
+    	setFocus();
+    };
 
-    		if (this.currentIndex() >= this.words().length)
-    			this.testCompleted(true);
+    var setFocus = function() {
+    	guessFocus(false);
+    	guessFocus(true);
+    };
+
+	var checkWord = function() {
+		answerIsCorrect(false);
+		answerIsWrong(false);
+    	if (wordGuessed().toLowerCase() == answer.trim().toLowerCase()) {
+    		answerIsCorrect(true);
+    		wordGuessed('');
+    		wordHint('');
+    		setFocus();
+    		currentIndex(currentIndex() + 1);
+			progress(currentIndex() / words().length * 100);
+
+    		if (currentIndex() >= words().length)
+    			testCompleted(true);
     		else {
-    			this.setNextQuestion(this.currentIndex());
+    			setNextQuestion(currentIndex());
     		}
 		} else {
-			this.answerIsWrong(true);
-    		this.wordGuessed('');
+			answerIsWrong(true);
+    		wordGuessed('');
     		setFocus();
 		}
-	}.bind(this);
+	};
 
-    this.fetchCollectionWords(this.collections()[this.currentIndex()]);
+    fetchCollectionWords(collections()[currentIndex()]);
+
+    return {
+        collections: collections,
+        guessFocus: guessFocus,
+        wordGuessed: wordGuessed,
+        wordHint: wordHint,
+        answerIsCorrect: answerIsCorrect,
+        answerIsWrong: answerIsWrong,
+        testCompleted: testCompleted,
+        progress: progress,
+        currentWord: currentWord,
+        isForeignWord: isForeignWord,
+        foreignWordAudio: foreignWordAudio,
+        norWordAudio: norWordAudio,
+        selectedCollection: selectedCollection,
+        fetchCollectionWords: fetchCollectionWords,
+        showWord: showWord,
+        checkWord: checkWord,
+        reset: reset,
+    };
 };
 
 $.get('api/?a=gc', function (data) { 
