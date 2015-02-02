@@ -139,7 +139,7 @@ function DeleteAudioFile($file) {
 
 function CreateAudioFile($language, $word) {
 	$wordToConvert = substr($word, 0, 100);
-	$langToUse = substr($language, 0, 2);
+	$langToUse = MapLanguage(substr($language, 0, 2));
 
 	$file  = md5($langToUse . $wordToConvert) . '.mp3';
 
@@ -164,4 +164,15 @@ function CreateAudioFile($language, $word) {
 	}
 	
 	return $file;
+}
+
+function MapLanguage($lang) {
+	switch ($lang) {
+		case 'no':
+			return 'nb_no';
+		case 'en':
+			return 'en_uk';
+		default:
+			return '';
+	}
 }
