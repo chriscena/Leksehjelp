@@ -9,10 +9,22 @@ var WordGameModel = function(items) {
     this.answerIsWrong = ko.observable(false);
     this.testCompleted = ko.observable(false);
     this.progress = ko.observable(0);
-    var audio = document.createElement('audio');
     var answer;
     this.currentIndex = ko.observable(0);
     this.currentWord = ko.observable();
+    this.isForeignWord = ko.computed(function() { 
+    	return viewModel.currentWord() && viewModel.currentWord().lang != 'no'; 
+    });
+    this.norWordAudio = ko.computed(function() {
+    	return viewModel.currentWord() && viewModel.currentWord().norwordaudio 
+    		? 'audio/' + viewModel.currentWord().norwordaudio
+    		: '';
+    });
+    this.foreignWordAudio = ko.computed(function() {
+    	return viewModel.currentWord() && viewModel.currentWord().foreignwordaudio 
+    		? 'audio/' + viewModel.currentWord().foreignwordaudio
+    		: '';
+    });
     this.selectedCollection = ko.observable();
 
     var shuffle = function (array) {
@@ -38,8 +50,9 @@ var WordGameModel = function(items) {
 			answer = viewModel.currentWord().foreignword;
 		}
 
-		audio.setAttribute('src', 'audio/' + this.currentWord().norwordaudio);
-		audio.load();
+		$('button.audio').on('click', function() { 
+			$(this).next('audio').get(0).play(); 
+		});	
 	}.bind(this);
 
     this.fetchCollectionWords = function(selected) {
@@ -72,13 +85,6 @@ var WordGameModel = function(items) {
     	viewModel.guessFocus(false);
     	viewModel.guessFocus(true);
     };
-
-    this.speakWord = function() {
-		this.answerIsCorrect(false);
-		this.answerIsWrong(false);
-		audio.play();
-		setFocus();
-	}.bind(this);
 
 	this.checkWord = function() {
 		this.answerIsCorrect(false);
