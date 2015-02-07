@@ -93,12 +93,13 @@ var WordGameModel = function(items) {
 
 	var checkWord = function() {
 		answerIsCorrect(false);
+        guessFocus(false);
 		answerIsWrong(false);
     	if (wordGuessed().toLowerCase() == answer.trim().toLowerCase()) {
     		answerIsCorrect(true);
     		wordGuessed('');
     		wordHint('');
-    		setFocus();
+            guessFocus(true);
     		currentIndex(currentIndex() + 1);
 			progress(currentIndex() / words().length * 100);
 
@@ -110,7 +111,7 @@ var WordGameModel = function(items) {
 		} else {
 			answerIsWrong(true);
     		wordGuessed('');
-    		setFocus();
+            guessFocus(true);
 		}
 	};
 
