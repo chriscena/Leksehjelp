@@ -50,13 +50,17 @@ var WordGameModel = function(items) {
 		}
 
         $('button.mainaudio').on('click', function() { 
+            guessFocus(false);
             answerIsCorrect(false);
             answerIsWrong(false);
             $(this).next('audio').get(0).play(); 
+            guessFocus(true);
         });
 
-		$('button.audio').on('click', function() { 
+		$('button.audio').on('click', function() {
+            guessFocus(false);
 			$(this).next('audio').get(0).play(); 
+            guessFocus(true);
 		});	
 	};
 
@@ -78,12 +82,13 @@ var WordGameModel = function(items) {
 	    answerIsWrong(false);
 	    testCompleted(false);
     	progress(0);
-	    setFocus();
+        guessFocus(true);
     };
 
     var showWord = function() {
+        guessFocus(false);
 		wordHint(answer);
-    	setFocus();
+        guessFocus(true);
     };
 
     var setFocus = function() {
