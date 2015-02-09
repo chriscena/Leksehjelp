@@ -26,6 +26,7 @@ var WordGameModel = function(items) {
         }),
         selectedCollection = ko.observable();
 
+
     var shuffle = function (array) {
 		var currentIndex = array.length, temporaryValue, randomIndex ;
 
@@ -48,31 +49,18 @@ var WordGameModel = function(items) {
 		else {
 			answer = currentWord().foreignword;
 		}
-
-        $('button.mainaudio').on('click', function() { 
-            guessFocus(false);
-            answerIsCorrect(false);
-            answerIsWrong(false);
-            $(this).next('audio').get(0).play(); 
-            guessFocus(true);
-        });
-
-		$('button.audio').on('click', function() {
-            guessFocus(false);
-			$(this).next('audio').get(0).play(); 
-            guessFocus(true);
-		});	
 	};
 
     var fetchCollectionWords = function(selected) {
-	selectedCollection(selected);
+	   selectedCollection(selected);
     	$.get('api/?a=gw&i='+ selected.collectionid, function (data) { 
-			words(shuffle(data.words));
+			words(data.words);
 			reset();
 		});
 	};
 
     var reset = function() {
+        words(shuffle(words()));
 	    guessFocus(false);
 	    wordGuessed('');
     	wordHint('');
@@ -119,6 +107,20 @@ var WordGameModel = function(items) {
             guessFocus(true);
 		}
 	};
+
+    $('button.mainaudio').on('click', function() { 
+        guessFocus(false);
+        answerIsCorrect(false);
+        answerIsWrong(false);
+        $(this).next('audio').get(0).play(); 
+        guessFocus(true);
+    }); 
+
+    $('button.audio').on('click', function() {
+        guessFocus(false);
+        $(this).next('audio').get(0).play(); 
+        guessFocus(true);
+    }); 
 
     fetchCollectionWords(collections()[currentIndex()]);
 
